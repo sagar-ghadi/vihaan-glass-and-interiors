@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { ContactForm } from '../components/ContactForm'
 
 const services = [
@@ -13,6 +14,33 @@ const projects = [
 ]
 
 export function HomePage() {
+  useEffect(() => {
+    const revealElements = document.querySelectorAll<HTMLElement>('[data-reveal]')
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      revealElements.forEach((element) => element.classList.add('is-visible'))
+      return
+    }
+
+    document.documentElement.classList.add('motion-ready')
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible')
+          observer.unobserve(entry.target)
+        }
+      })
+    }, { threshold: 0.14, rootMargin: '0px 0px -36px 0px' })
+
+    revealElements.forEach((element) => observer.observe(element))
+
+    return () => {
+      observer.disconnect()
+      document.documentElement.classList.remove('motion-ready')
+    }
+  }, [])
+
   return (
     <main id="home">
       <section className="hero" aria-labelledby="hero-title">
@@ -29,19 +57,19 @@ export function HomePage() {
       </section>
 
       <section className="intro-band" id="about">
-        <p className="eyebrow">A MORE THOUGHTFUL FINISH</p>
-        <p className="intro-statement">Good design is felt in the everyday. We pair precise glasswork with a considered eye for how a room should <em>feel.</em></p>
-        <span className="intro-index">01 — 03</span>
+        <p className="eyebrow" data-reveal>A MORE THOUGHTFUL FINISH</p>
+        <p className="intro-statement" data-reveal>Good design is felt in the everyday. We pair precise glasswork with a considered eye for how a room should <em>feel.</em></p>
+        <span className="intro-index" data-reveal>01 — 03</span>
       </section>
 
       <section className="work-section section-wrap" id="work">
-        <div className="section-heading">
+        <div className="section-heading" data-reveal>
           <div><p className="eyebrow">MATERIAL & SPACE STUDIES</p><h2>Made for <em>living.</em></h2></div>
           <p>Every space has its own character. Our work starts by listening, then making the details feel like they always belonged.</p>
         </div>
         <div className="project-grid">
           {projects.map((project, index) => (
-            <article className={`project-card project-card-${index + 1}`} key={project.name}>
+            <article className={`project-card project-card-${index + 1}`} data-reveal key={project.name}>
               <div className={`project-image ${project.className}`}>
                 <img src={project.image} alt={project.alt} loading="lazy" />
                 <span className="project-number">0{index + 1}</span>
@@ -54,10 +82,10 @@ export function HomePage() {
 
       <section className="services-section" id="services">
         <div className="services-inner">
-          <div className="services-heading"><p className="eyebrow">WHAT WE DO</p><h2>Clear thinking.<br /><em>Beautifully made.</em></h2><p>From first measure to final fitting, one team takes care of the details.</p></div>
+          <div className="services-heading" data-reveal><p className="eyebrow">WHAT WE DO</p><h2>Clear thinking.<br /><em>Beautifully made.</em></h2><p>From first measure to final fitting, one team takes care of the details.</p></div>
           <div className="service-list">
             {services.map((service) => (
-              <article className="service-row" key={service.number}>
+              <article className="service-row" data-reveal key={service.number}>
                 <span className="service-number">{service.number}</span>
                 <div><h3>{service.name}</h3><p>{service.detail}</p></div>
                 <span className="service-arrow" aria-hidden="true">↗</span>
@@ -68,13 +96,13 @@ export function HomePage() {
       </section>
 
       <section className="contact-section" id="contact">
-        <div className="contact-aside">
+        <div className="contact-aside" data-reveal>
           <p className="eyebrow">LET'S MAKE SOMETHING LAST</p>
           <h2>Tell us what<br />you <em>see.</em></h2>
           <p className="contact-note">A new room, a renovation, or one detail you can't quite solve. Tell us a little about it and our team will be in touch.</p>
           <div className="contact-mark" aria-hidden="true">V<span>G&I</span></div>
         </div>
-        <div className="contact-form-wrap"><ContactForm /></div>
+        <div className="contact-form-wrap" data-reveal><ContactForm /></div>
       </section>
     </main>
   )
